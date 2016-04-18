@@ -30,20 +30,4 @@ class $className extends $baseClassName
 
     }
 
-    /**
-     * Migrate Up.
-     */
-    public function up()
-    {
-
-    }
-
-    /**
-     * Migrate Down.
-     */
-    public function down()
-    {
-
-    }
-
 }
