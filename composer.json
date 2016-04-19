@@ -28,6 +28,9 @@
     "autoload": {
         "psr-4": {
             "Phinx\\": "src/Phinx"
+        },
+        "psr-0" : {
+            "ActiveRecord" : "src/"
         }
     },
     "autoload-dev": {

@@ -28,8 +28,9 @@
  */
 namespace Phinx\Migration;
 
-use Phinx\Db\Table;
+use ActiveRecord\ActiveDatabase;
 use Phinx\Db\Adapter\AdapterInterface;
+use Phinx\Db\Table;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -44,6 +45,13 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 abstract class AbstractMigration implements MigrationInterface
 {
+    /**
+     * [$db for active record]
+     *
+     * @var [type]
+     */
+    public $db;
+
     /**
      * @var float
      */
@@ -94,11 +102,51 @@ abstract class AbstractMigration implements MigrationInterface
     }
 
     /**
+     * [setActiveRecord]
+     *
+     * @param string $info [config host]
+     */
+    public function setActiveRecord(array $config)
+    {
+        /**
+            TODO:
+            - usr for mysqli
+         */
+        if ($config['adapter'] == 'mysql') {
+            $dbdriver = 'mysqli';
+        }
+        else{
+            // die( 'DB Driver is not support active record process' );
+            $dbdriver = $config['adapter'];
+        }
+
+        // Create Database configs
+        $db_config = array(
+            'hostname' => $config['host'],
+            'username' => $config['user'],
+            'password' => $config['pass'],
+            'database' => $config['name'],
+            'dbdriver' => $dbdriver,
+            'pconnect' => false,
+            'db_debug' => true,
+        );
+        // Add Config and give it a name
+        ActiveDatabase::addConfig("read", $db_config);
+        return $db = ActiveDatabase::get("read");
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function setAdapter(AdapterInterface $adapter)
     {
         $this->adapter = $adapter;
+
+        if (is_array($this->adapter->getOptions())) {
+
+            $this->db = $this->setActiveRecord($this->adapter->getOptions());
+        }
+
         return $this;
     }
 
