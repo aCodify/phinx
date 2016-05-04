@@ -2737,7 +2737,7 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 		));
 	}
 
-    public function modify_qurey( $status = false)
+    public function modify_qurey( $status = true)
     {
         $this->db_modify = $status;
         return $this;
