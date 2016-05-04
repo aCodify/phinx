@@ -1777,6 +1777,17 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 			$this->limit($limit);
 		}
 
+        // ser insert for update empty
+        $result = $this->query($this->_compile_select());
+        if (empty( $result->result_id->num_rows )) {
+            foreach ($this->qb_where as $key => $value) {
+                $dbwhere = explode( " = ", $value);
+                $thisdbwhere[$dbwhere[0]] = $dbwhere[1];
+            }
+            $this->qb_set = array_merge($thisdbwhere, $this->qb_set);
+            return $this->insert($table , $set);
+        }
+
 		$sql = $this->_update($this->protect_identifiers($this->qb_from[0], TRUE, NULL, FALSE), $this->qb_set);
 		$this->_reset_write();
 		return $this->query($sql);
