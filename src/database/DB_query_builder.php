@@ -256,6 +256,8 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 	 */
 	protected $qb_cache_no_escape			= array();
 
+    protected $db_modify    = FALSE;
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -1777,15 +1779,17 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 			$this->limit($limit);
 		}
 
-        // ser insert for update empty
-        $result = $this->query($this->_compile_select());
-        if (empty( $result->result_id->num_rows )) {
-            foreach ($this->qb_where as $key => $value) {
-                $dbwhere = explode( " = ", $value);
-                $thisdbwhere[$dbwhere[0]] = $dbwhere[1];
+        if ($this->db_modify) {
+            // ser insert for update empty
+            $result = $this->query($this->_compile_select());
+            if (empty( $result->result_id->num_rows )) {
+                foreach ($this->qb_where as $key => $value) {
+                    $dbwhere = explode( " = ", $value);
+                    $thisdbwhere[$dbwhere[0]] = $dbwhere[1];
+                }
+                $this->qb_set = array_merge($thisdbwhere, $this->qb_set);
+                return $this->insert($table , $set);
             }
-            $this->qb_set = array_merge($thisdbwhere, $this->qb_set);
-            return $this->insert($table , $set);
         }
 
 		$sql = $this->_update($this->protect_identifiers($this->qb_from[0], TRUE, NULL, FALSE), $this->qb_set);
@@ -2732,5 +2736,11 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 			'qb_limit'	=> FALSE
 		));
 	}
+
+    public function modify_qurey( $status = false)
+    {
+        $this->db_modify = $status;
+        return $this;
+    }
 
 }
