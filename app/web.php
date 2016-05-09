@@ -71,6 +71,15 @@ if (!isset($routes[$command])) {
     die("Command not found! Valid commands are: {$commands}.");
 }
 
+if (file_exists($_SERVER["DOCUMENT_ROOT"] . '/phinx.php')) {
+    $environmentsWeb = require $_SERVER["DOCUMENT_ROOT"] . '/phinx.php';
+}
+
+if (!empty( $_GET['e'] )) {
+    $environmentsWeb = addslashes($_GET['e']);
+} else {
+    $environmentsWeb = (! empty( $environmentsWeb['environments']['default_database'] )) ? $environmentsWeb['environments']['default_database'] : 'development' ;
+}
 
 $found = false;
 foreach ($files as $file) {
