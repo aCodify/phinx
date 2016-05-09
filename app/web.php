@@ -38,9 +38,18 @@
 // - (string) "t" target version
 // - (boolean) "debug" enable debugging?
 
+// set show error
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Get the phinx console application and inject it into TextWrapper.
-$app = require __DIR__ . '/phinx.php';
-$wrap = new Phinx\Wrapper\TextWrapper($app);
+if (!defined('PHINX_VERSION')) {
+    define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.3.6' : '@PHINX_VERSION@');
+}
+$files = array(
+  __DIR__ . '/../vendor/autoload.php',
+);
 
 // Mapping of route names to commands.
 $routes = [
@@ -62,22 +71,33 @@ if (!isset($routes[$command])) {
     die("Command not found! Valid commands are: {$commands}.");
 }
 
-// Get the environment and target version parameters.
-$env    = isset($_GET['e']) ? $_GET['e'] : null;
-$target = isset($_GET['t']) ? $_GET['t'] : null;
 
-// Check if debugging is enabled.
-$debug  = !empty($_GET['debug']) && filter_var($_GET['debug'], FILTER_VALIDATE_BOOLEAN);
-
-// Execute the command and determine if it was successful.
-$output = call_user_func([$wrap, $routes[$command]], $env, $target);
-$error  = $wrap->getExitCode() > 0;
-
-// Finally, display the output of the command.
-header('Content-Type: text/plain', true, $error ? 500 : 200);
-if ($debug) {
-    // Show what command was executed based on request parameters.
-    $args = implode(', ', [var_export($env, true), var_export($target, true)]);
-    echo "DEBUG: $command($args)" . PHP_EOL . PHP_EOL;
+$found = false;
+foreach ($files as $file) {
+    if (file_exists($file)) {
+        require $file;
+        $found = true;
+        break;
+    }
 }
-echo $output;
+if (!$found) {
+    die(
+      'You need to set up the project dependencies using the following commands:' . PHP_EOL .
+      'curl -s http://getcomposer.org/installer | php' . PHP_EOL .
+      'php composer.phar install' . PHP_EOL
+    );
+}
+$app = new Phinx\Console\PhinxApplication(PHINX_VERSION);
+// enable running phinx from the web by injecting ArrayInput and StreamOutput
+// run locally with: php -S localhost:8080 web.php
+$stream = fopen('php://output', 'w');
+fwrite($stream, '<pre>');
+$output = new Symfony\Component\Console\Output\StreamOutput($stream);
+$input = new Symfony\Component\Console\Input\ArrayInput([
+    // first arg is the command
+    $command,
+    // other args are the options for the command
+    '-e' => 'development',
+]);
+$app->run($input, $output);
+fwrite($stream, '</pre>');
