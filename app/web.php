@@ -48,7 +48,7 @@ if (!defined('PHINX_VERSION')) {
     define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.3.6' : '@PHINX_VERSION@');
 }
 $files = array(
-  __DIR__ . '/../vendor/autoload.php',
+  $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php',
 );
 
 // Mapping of route names to commands.
