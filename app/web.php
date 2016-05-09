@@ -106,7 +106,7 @@ $input = new Symfony\Component\Console\Input\ArrayInput([
     // first arg is the command
     $command,
     // other args are the options for the command
-    '-e' => 'development',
+    '-e' => $environmentsWeb,
 ]);
 $app->run($input, $output);
 fwrite($stream, '</pre>');
