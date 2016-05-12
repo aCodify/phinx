@@ -25,10 +25,15 @@ class $className extends $baseClassName
      * Remember to call "create()" or "update()" and NOT "save()" when working
      * with the Table class.
      */
-    public function change()
+
+    /**
+     * Migrate Up. โดน comment ไว้เพราะ function นี้ถ้าเปิดจะไม่สามารถใช้ function up() and down() ได้ 
+     * หลักการทำงาน function change()  จะทำการ run ไม่ว่าจะ up หรือ down
+     */
+    /*public function change()
     {
 
-    }
+    }*/
 
     /**
      * Migrate Up.
